@@ -7,7 +7,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductRepository repo;
+    private final ProductService service;
 
     @GetMapping
-    public Page<Product> list(
+    public Page<ProductDtos.ProductResponse> list(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "0") int page,
@@ -34,57 +33,36 @@ public class ProductController {
                 Sort.by("id").descending()
         );
 
-        boolean hasCategory = category != null && !category.isBlank();
-        boolean hasName = name != null && !name.isBlank();
-
-        if (hasCategory && hasName) {
-            return repo.findByCategoryIgnoreCaseAndNameContainingIgnoreCase(
-                    category.trim(), name.trim(), pageable
-            );
-        }
-
-        if (hasCategory) {
-            return repo.findByCategoryIgnoreCase(category.trim(), pageable);
-        }
-
-        if (hasName) {
-            return repo.findByNameContainingIgnoreCase(name.trim(), pageable);
-        }
-
-        return repo.findAll(pageable);
+        return service.list(category, name, pageable);
     }
 
     @GetMapping("/{id}")
-    public Product get(@PathVariable Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(id));
+    public ProductDtos.ProductResponse get(@PathVariable Long id) {
+        return service.get(id);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
-        product.setId(null);
-        return ResponseEntity.status(HttpStatus.CREATED).body(repo.save(product));
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductDtos.ProductResponse create(
+            @Valid @RequestBody ProductDtos.ProductRequest request
+    ) {
+        return service.create(request);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Product update(@PathVariable Long id, @Valid @RequestBody Product input) {
-        Product product = get(id);
-
-        product.setName(input.getName());
-        product.setDescription(input.getDescription());
-        product.setPrice(input.getPrice());
-        product.setStock(input.getStock());
-        product.setCategory(input.getCategory());
-
-        return repo.save(product);
+    public ProductDtos.ProductResponse update(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductDtos.ProductRequest request
+    ) {
+        return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        repo.delete(get(id));
+        service.delete(id);
     }
 }
