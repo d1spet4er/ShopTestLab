@@ -1,0 +1,5 @@
+package com.shoptestlab.config;
+import com.shoptestlab.product.*; import com.shoptestlab.user.*; import org.springframework.boot.CommandLineRunner; import org.springframework.context.annotation.*; import org.springframework.security.crypto.password.PasswordEncoder; import java.math.BigDecimal;
+@Configuration public class SeedData {
+ @Bean CommandLineRunner seed(ProductRepository products,UserRepository users,PasswordEncoder encoder){return args->{if(users.count()==0){users.save(new User("admin@shoptestlab.local",encoder.encode("Admin123!"),User.Role.ADMIN));users.save(new User("user@shoptestlab.local",encoder.encode("User12345!"),User.Role.USER));}if(products.count()==0){products.save(new Product("Mechanical Keyboard","Hot-swap keyboard with RGB lighting",new BigDecimal("89.90"),25,"Keyboards"));products.save(new Product("Wireless Mouse","Ergonomic 2.4 GHz mouse",new BigDecimal("39.90"),50,"Mice"));products.save(new Product("USB-C Hub","7-in-1 aluminum USB-C hub",new BigDecimal("59.90"),18,"Accessories"));}};}
+}

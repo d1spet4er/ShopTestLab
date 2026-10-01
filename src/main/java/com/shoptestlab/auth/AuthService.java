@@ -1,0 +1,6 @@
+package com.shoptestlab.auth;
+import com.shoptestlab.user.*; import lombok.RequiredArgsConstructor; import org.springframework.security.crypto.password.PasswordEncoder; import org.springframework.stereotype.Service; import org.springframework.security.authentication.BadCredentialsException;
+@Service @RequiredArgsConstructor public class AuthService {private final UserRepository users;private final PasswordEncoder encoder;private final JwtService jwt;
+ public AuthDtos.AuthResponse register(AuthDtos.RegisterRequest r){if(users.existsByEmail(r.email()))throw new IllegalArgumentException("Email already registered");User u=users.save(new User(r.email(),encoder.encode(r.password()),User.Role.USER));return new AuthDtos.AuthResponse(jwt.generate(u.getEmail(),u.getRole().name()),u.getEmail(),u.getRole().name());}
+ public AuthDtos.AuthResponse login(AuthDtos.LoginRequest r){User u=users.findByEmail(r.email()).orElseThrow(()->new BadCredentialsException("Invalid credentials"));if(!encoder.matches(r.password(),u.getPassword()))throw new BadCredentialsException("Invalid credentials");return new AuthDtos.AuthResponse(jwt.generate(u.getEmail(),u.getRole().name()),u.getEmail(),u.getRole().name());}
+}
