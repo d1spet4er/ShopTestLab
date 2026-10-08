@@ -29,8 +29,8 @@ jobs:
       SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/shoptestlab
       SPRING_DATASOURCE_USERNAME: shoptestlab
       SPRING_DATASOURCE_PASSWORD: shoptestlab
-      APP_JWT_SECRET: change-me-change-me-change-me-change-me-123456
-      APP_JWT_EXPIRATION_MS: 3600000
+      JWT_SECRET: change-me-change-me-change-me-change-me-123456
+      JWT_EXPIRATION_MS: 3600000
 
     steps:
       - name: Checkout
@@ -44,4 +44,4 @@ jobs:
           cache: maven
 
       - name: Run tests
-        run: ./mvnw test -B
+        run: mvn test -B
