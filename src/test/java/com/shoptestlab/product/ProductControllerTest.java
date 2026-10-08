@@ -7,28 +7,36 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
-    @Mock ProductRepository repo;
+
+    @Mock ProductService service;
+
     @InjectMocks ProductController controller;
 
     @Test
     void getProduct_returnsProduct() {
-        Product p = new Product("Keyboard", "desc", BigDecimal.TEN, 3, "Keyboards");
-        p.setId(1L);
-        when(repo.findById(1L)).thenReturn(Optional.of(p));
+        ProductDtos.ProductResponse response = new ProductDtos.ProductResponse(
+                1L, "Keyboard", "desc", BigDecimal.TEN, 3, "Keyboards"
+        );
+
+        when(service.get(1L)).thenReturn(response);
 
         assertEquals("Keyboard", controller.get(1L).getName());
+        verify(service).get(1L);
     }
 
     @Test
-    void getProduct_throwsWhenMissing() {
-        when(repo.findById(999L)).thenReturn(Optional.empty());
-        assertThrows(ProductNotFoundException.class, () -> controller.get(999L));
+    void getProduct_propagatesNotFound() {
+        when(service.get(999L)).thenThrow(new ProductNotFoundException(999L));
+
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> controller.get(999L)
+        );
     }
 }
