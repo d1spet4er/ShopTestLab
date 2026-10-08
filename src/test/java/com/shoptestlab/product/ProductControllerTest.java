@@ -26,7 +26,7 @@ class ProductControllerTest {
 
         when(service.get(1L)).thenReturn(response);
 
-        assertEquals("Keyboard", controller.get(1L).getName());
+        assertEquals("Keyboard", controller.get(1L).name());
         verify(service).get(1L);
     }
 
