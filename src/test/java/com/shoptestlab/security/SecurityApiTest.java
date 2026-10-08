@@ -77,7 +77,6 @@ class SecurityApiTest {
     }
 
     @Test
-    @Test
     void userCannotCreateProduct() throws Exception {
         User user = users.save(new User(
                 "regular@test.local",
