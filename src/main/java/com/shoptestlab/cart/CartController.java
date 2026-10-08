@@ -1,5 +1,6 @@
 package com.shoptestlab.cart;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
 public class CartController {
-
     private final CartService service;
 
     @GetMapping
@@ -19,16 +19,12 @@ public class CartController {
     @PostMapping("/items")
     public CartDtos.CartResponse addItem(
             Authentication authentication,
-            @RequestBody CartDtos.AddCartItemRequest request
-    ) {
+            @Valid @RequestBody CartDtos.AddCartItemRequest request) {
         return service.addItem(authentication.getName(), request);
     }
 
     @DeleteMapping("/items/{id}")
-    public void removeItem(
-            Authentication authentication,
-            @PathVariable Long id
-    ) {
+    public void removeItem(Authentication authentication, @PathVariable Long id) {
         service.removeItem(authentication.getName(), id);
     }
 
