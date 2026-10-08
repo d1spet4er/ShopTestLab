@@ -77,6 +77,39 @@ class SecurityApiTest {
     }
 
     @Test
+    @Test
+    void userCannotCreateProduct() throws Exception {
+        User user = users.save(new User(
+                "regular@test.local",
+                encoder.encode("password123"),
+                User.Role.USER
+        ));
+        String token = jwt.generate(user.getEmail(), user.getRole().name());
+
+        mvc.perform(post("/api/v1/products")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Test product","description":"test","price":10.00,"stock":5,"category":"test"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void userCannotDeleteProduct() throws Exception {
+        User user = users.save(new User(
+                "delete@test.local",
+                encoder.encode("password123"),
+                User.Role.USER
+        ));
+        String token = jwt.generate(user.getEmail(), user.getRole().name());
+
+        mvc.perform(delete("/api/v1/products/1")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void publicProductListDoesNotRequireAuthentication() throws Exception {
         mvc.perform(get("/api/v1/products"))
                 .andExpect(status().isOk());
