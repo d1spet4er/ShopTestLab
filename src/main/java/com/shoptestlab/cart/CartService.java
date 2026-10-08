@@ -44,12 +44,8 @@ public class CartService {
         User user = users.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Product product = products.findById(request.productId())
+        Product product = products.findWithLockById(request.productId())
                 .orElseThrow(() -> new ProductNotFoundException(request.productId()));
-
-        if (request.quantity() > product.getStock()) {
-            throw new IllegalArgumentException("Not enough product stock");
-        }
 
         CartItem item = cartItems
                 .findByUserEmailAndProductId(email, product.getId())
