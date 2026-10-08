@@ -37,7 +37,8 @@ public class OrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem cartItem : items) {
-            Product product = cartItem.getProduct();
+            Product product = products.findWithLockById(cartItem.getProduct().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
             if (cartItem.getQuantity() > product.getStock()) {
                 throw new IllegalArgumentException(
