@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "feat/**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: shoptestlab
+          POSTGRES_USER: shoptestlab
+          POSTGRES_PASSWORD: shoptestlab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U shoptestlab -d shoptestlab"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/shoptestlab
+      SPRING_DATASOURCE_USERNAME: shoptestlab
+      SPRING_DATASOURCE_PASSWORD: shoptestlab
+      APP_JWT_SECRET: change-me-change-me-change-me-change-me-123456
+      APP_JWT_EXPIRATION_MS: 3600000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run tests
+        run: ./mvnw test -B
